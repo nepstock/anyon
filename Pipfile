@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+black = "==19.10b0"
+pytest = "*"
+mypy = "*"
+pycodestyle = "*"
+pydocstyle = "*"
+
+[packages]
+falcon = "*"
+gunicorn = "*"
+msgpack-python = "*"
+
+[requires]
+python_version = "3.8"
