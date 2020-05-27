@@ -9,11 +9,19 @@ pytest = "*"
 mypy = "*"
 pycodestyle = "*"
 pydocstyle = "*"
+pyflakes = "*"
+requests-mock = "*"
+vulture = "*"
 
 [packages]
 falcon = "*"
 gunicorn = "*"
-msgpack-python = "*"
+msgpack = "*"
+marshmallow = "*"
+aiohttp = "*"
+cchardet = "*"
+aiodns = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
