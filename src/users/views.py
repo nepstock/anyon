@@ -9,7 +9,7 @@ from .serializer import SignUpSchema
 
 
 class Collection(object):
-    def __init__(self, api, credentials_store, domain, scope):
+    def __init__(self, api, credentials_store, domain: str, scope: str):
         self._api = api
         self._domain = domain
         self._credentials = credentials_store
@@ -39,13 +39,13 @@ class Collection(object):
 
 
 class Item(object):
-    def __init__(self, api, credentials_store, domain, scope):
+    def __init__(self, api, credentials_store, domain: str, scope: str):
         self._api = api
         self._domain = domain
         self._credentials = credentials_store
         self._scope = scope
 
-    def on_get(self, req, resp, user_id):
+    def on_get(self, req, resp, user_id: str):
         access_token = self._credentials.get_token(self._domain, self._scope)
         user_data = self._api.get_user(self._domain, access_token, user_id)
         resp.body = json.dumps(user_data, ensure_ascii=False, sort_keys=True)

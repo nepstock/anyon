@@ -1,8 +1,9 @@
 import json
 import os
 from functools import lru_cache
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
+from marshmallow.exceptions import ValidationError
 from requests.adapters import HTTPAdapter
 
 from src.api.auth import BearerAuth
@@ -10,7 +11,6 @@ from src.api.client import Client
 
 from .constants import GRANT_TYPES, PATHS, GrantTypes, Services
 from .serializer import TokenSchema, UserSchema
-from marshmallow.exceptions import ValidationError
 
 
 class AM:
@@ -24,27 +24,46 @@ class AM:
     def _create_url(self, domain: str, path_key: Services) -> str:
         return f"{self._host}/{domain}/{PATHS[path_key]}"
 
-    def get_client_credentials(
+    def _token(
         self,
-        domain: str,
-        client_id: str,
-        client_secret: str,
+        url: str,
+        payload: Dict,
+        auth: Tuple[str, str],
         scope: Optional[str] = None,
     ):
-        url = self._create_url(domain, Services.Token)
-        payload = {
-            "grant_type": GRANT_TYPES[GrantTypes.Credentials],
-        }
         if scope is not None:
             payload["scope"] = scope
 
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        }
         r = self._http.send(
-            "post", url, data=payload, auth=(client_id, client_secret),
+            "post", url, data=payload, headers=headers, auth=auth
         )
         r.raise_for_status()
         if r.status_code == 200:
             return TokenSchema().load(r.json())
         return None
+
+    def token(
+        self,
+        domain: str,
+        client_id: str,
+        client_secret: str,
+        scope: Optional[str],
+        **kwargs,
+    ):
+        url = self._create_url(domain, Services.Token)
+        payload = {
+            "grant_type": GRANT_TYPES[GrantTypes.Credentials],
+        }
+        if "username" in kwargs and "password" in kwargs:
+            payload = {
+                "grant_type": GRANT_TYPES[GrantTypes.Password],
+                "username": kwargs["username"],
+                "password": kwargs["password"],
+            }
+        return self._token(url, payload, (client_id, client_secret), scope)
 
     def get_user(self, domain: str, token: str, user_id: str):
         url = self._create_url(domain, Services.Users)
