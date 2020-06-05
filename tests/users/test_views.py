@@ -1,22 +1,21 @@
 import json
-import os
 import uuid
 from unittest.mock import patch
 
 import falcon
 import pytest
 
-from src.users.views import Collection, Item
+from src.settings import AM_DOMAIN
 
 
 class TestItemSerializer:
     def test_item_success(
-        self, client, output_am_get_user_response,
+        self, mock_env, client, output_am_get_user_response,
     ):
         url = f"/users/{output_am_get_user_response['id']}"
         response = client.simulate_get(url)
         client.mock_am.get_user.assert_called_with(
-            os.getenv("AM_DOMAIN"),
+            AM_DOMAIN,
             client.mock_credentials.get_token(),
             output_am_get_user_response["id"],
         )
@@ -29,6 +28,7 @@ class TestCollectionSerializer:
     def test_post_success(
         self,
         get_new_uuid,
+        mock_env,
         client,
         input_users_post,
         output_am_get_user_response,
@@ -46,9 +46,7 @@ class TestCollectionSerializer:
             "emails": [{"value": input_users_post["email"], "primary": True}],
         }
         client.mock_am.create_user.assert_called_with(
-            os.getenv("AM_DOMAIN"),
-            client.mock_credentials.get_token(),
-            new_user,
+            AM_DOMAIN, client.mock_credentials.get_token(), new_user,
         )
         assert response.status == falcon.HTTP_201
         assert response.json == output_am_get_user_response

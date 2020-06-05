@@ -1,5 +1,6 @@
 import os
 from enum import Enum, unique
+from typing import Dict, Final, Set
 
 
 @unique
@@ -11,16 +12,19 @@ class Services(Enum):
 @unique
 class GrantTypes(Enum):
     Credentials = 1
-    Token = 2
+    Password = 2
 
 
-GRANT_TYPES = {GrantTypes.Credentials: "client_credentials"}
+GRANT_TYPES: Final[Dict[GrantTypes, str]] = {
+    GrantTypes.Credentials: "client_credentials",
+    GrantTypes.Password: "password",
+}
 
-PATHS = {
+PATHS: Final[Dict[Services, str]] = {
     Services.Users: os.getenv("AM_PATH_USERS", ""),
     Services.Token: os.getenv("AM_PATH_TOKEN", ""),
 }
 
-CLIENT_CREDENTIALS_SCOPES = set(
+CLIENT_CREDENTIALS_SCOPES: Final[Set] = set(
     os.getenv("AM_CLIENT_CREDENTIALS_SCOPE", "").split(" ")
 )
