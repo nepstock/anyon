@@ -1,0 +1,15 @@
+.gitignore
+pytest.ini
+README.md
+.env*
+tests/
+deploy/
+.vscode/
+src/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.coverage*
+*.log
+.git

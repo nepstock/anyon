@@ -1,0 +1,22 @@
+version: '3.5'
+
+networks:
+  services:
+    external: true
+
+services:
+  anyon:
+    container_name: anyon
+    build:
+        context: ../
+        dockerfile: ./deploy/Dockerfile
+    env_file: "../.env_docker"
+    volumes:
+        - ../src:/app/src
+    command: gunicorn 'src.app:get_app()' -c /app/src/server_config.py
+    ports:
+      - "8001:${APP_PORT}"
+    external_links:   
+      - gio_am_nginx:am_nginx
+    networks:
+      - services
