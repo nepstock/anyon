@@ -37,9 +37,13 @@ class TokenSchema(Schema):
             raise ValidationError("Invalid token type value.")
 
     @validates("scope")
-    def scope_validation(context, value):
+    def scope_validation(self, value):
         values = set(value.split(" "))
-        if not values.issubset(CLIENT_CREDENTIALS_SCOPES):
+        values_l = len(values)
+        scopes_l = len(CLIENT_CREDENTIALS_SCOPES)
+        if values_l > scopes_l and not values.issubset(
+            CLIENT_CREDENTIALS_SCOPES
+        ):
             raise ValidationError("Invalid scope value.")
 
 

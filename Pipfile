@@ -18,9 +18,6 @@ falcon = "*"
 gunicorn = "*"
 msgpack = "*"
 marshmallow = "*"
-aiohttp = "*"
-cchardet = "*"
-aiodns = "*"
 requests = "*"
 
 [requires]

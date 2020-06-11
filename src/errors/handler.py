@@ -9,6 +9,10 @@ def handle_validations(req, resp, error, params):
 
 def handle_http(req, resp, error, params):
     error_item = error.response.json()
+    if "scimType" not in error_item:
+        error_item["scimType"] = "invalid_parameter"
+    if "detail" not in error_item:
+        error_item["detail"] = error_item["error_description"]
     if error.response.status_code == 400:
         raise falcon.HTTPBadRequest(
             title=error_item["scimType"], description=error_item["detail"],

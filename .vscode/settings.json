@@ -1,5 +1,4 @@
 {
-  "python.pythonPath": "/home/hiigami/.virtualenvs/anyon-O4HWOo9n/bin/python",
   "python.formatting.provider": "black",
   "python.formatting.blackArgs": [
     "--line-length",

@@ -1,14 +1,24 @@
 import json
-import os
+from typing import Optional
 
 import falcon
 
+from .constants import AUTHORIZATION
+from .helpers import remove_token_type, transform_token_data
 from .serializer import SignInSchema
 
 
 class Collection(object):
-    def __init__(self, api, secrets_store, domain: str, scope: str):
+    def __init__(
+        self,
+        api,
+        client_id: str,
+        secrets_store,
+        domain: str,
+        scope: Optional[str],
+    ):
         self._api = api
+        self._client_id = client_id
         self._domain = domain
         self._secrets_store = secrets_store
         self._scope = scope
@@ -24,8 +34,15 @@ class Collection(object):
             username=data["username"],
             password=data["password"],
         )
-        del token_data["expires_date"]
-        token_data["scope"] = token_data["scope"].replace("scim", "")
+        token_data = transform_token_data(token_data)
         resp.body = json.dumps(token_data, ensure_ascii=False, sort_keys=True)
         resp.content_type = falcon.MEDIA_JSON
         resp.status = falcon.HTTP_200
+
+    def on_delete(self, req, resp):
+        if AUTHORIZATION not in req.headers:
+            raise falcon.HTTPBadRequest()
+        token = remove_token_type(req.headers[AUTHORIZATION])
+        secret = self._secrets_store.get_secret(self._client_id)
+        self._api.revoke(self._domain, self._client_id, secret, token)
+        resp.status = falcon.HTTP_204

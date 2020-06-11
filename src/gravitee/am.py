@@ -1,5 +1,4 @@
 import json
-import os
 from functools import lru_cache
 from typing import Dict, Optional, Tuple
 
@@ -64,6 +63,28 @@ class AM:
                 "password": kwargs["password"],
             }
         return self._token(url, payload, (client_id, client_secret), scope)
+
+    def revoke(
+        self,
+        domain: str,
+        client_id: str,
+        client_secret: str,
+        token: str,
+        token_type_hint: str = "access_token",
+    ):
+        url = self._create_url(domain, Services.Revoke)
+        payload = {"token": token, "token_type_hint": token_type_hint}
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        }
+        r = self._http.send(
+            "post",
+            url,
+            data=payload,
+            headers=headers,
+            auth=(client_id, client_secret),
+        )
+        r.raise_for_status()
 
     def get_user(self, domain: str, token: str, user_id: str):
         url = self._create_url(domain, Services.Users)
