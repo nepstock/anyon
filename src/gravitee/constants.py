@@ -7,6 +7,7 @@ from typing import Dict, Final, Set
 class Services(Enum):
     Users = 1
     Token = 2
+    Revoke = 3
 
 
 @unique
@@ -23,6 +24,7 @@ GRANT_TYPES: Final[Dict[GrantTypes, str]] = {
 PATHS: Final[Dict[Services, str]] = {
     Services.Users: os.getenv("AM_PATH_USERS", ""),
     Services.Token: os.getenv("AM_PATH_TOKEN", ""),
+    Services.Revoke: os.getenv("AM_PATH_REVOKE", ""),
 }
 
 CLIENT_CREDENTIALS_SCOPES: Final[Set] = set(

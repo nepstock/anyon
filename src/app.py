@@ -7,6 +7,7 @@ from src.errors.handler import (
     handle_validations,
 )
 
+from .auth.views import Collection as AuthCollection
 from .gravitee.am import AM
 from .helpers.adapter import get_adapter
 from .helpers.secrets import Secrets, check_secret
@@ -20,7 +21,6 @@ from .settings import (
     AM_URL,
 )
 from .users.views import Collection, Item
-from .auth.views import Collection as AuthCollection
 
 
 def create_app(am_api, credentials, secrets):
@@ -28,7 +28,9 @@ def create_app(am_api, credentials, secrets):
 
     api.add_route(
         "/oauth/token",
-        AuthCollection(am_api, secrets, AM_DOMAIN, AM_CLIENT_SCOPE),
+        AuthCollection(
+            am_api, AM_CLIENT_ID, secrets, AM_DOMAIN, AM_CLIENT_SCOPE
+        ),
     )
     api.add_route(
         "/users", Collection(am_api, credentials, AM_DOMAIN, AM_CLIENT_SCOPE)

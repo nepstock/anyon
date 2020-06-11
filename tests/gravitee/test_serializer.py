@@ -3,13 +3,16 @@ import uuid
 import pytest
 from marshmallow.exceptions import ValidationError
 
+from src.gravitee.constants import CLIENT_CREDENTIALS_SCOPES
 from src.gravitee.serializer import TokenSchema, UserSchema
+
+SCOPE = next(iter(CLIENT_CREDENTIALS_SCOPES))
 
 
 class TestTokenSerializer:
-    def test_load_success(self):
+    def test_load_success(self, mock_env):
         token_data = {
-            "scope": "scim openid",
+            "scope": SCOPE,
             "expires_in": 7199,
             "id_token": "aKAhpjUMn_dYbH5jiDdJn8s0EdbtbMNqOTPhcI89T2g",
             "token_type": "bearer",
@@ -31,7 +34,7 @@ class TestTokenSerializer:
 
     def test_load_invalid_token_type(self):
         token_data = {
-            "scope": "scim openid",
+            "scope": SCOPE,
             "expires_in": 7199,
             "id_token": "aKAhpjUMn_dYbH5jiDdJn8s0EdbtbMNqOTPhcI89T2g",
             "token_type": "blablabla",
