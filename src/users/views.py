@@ -7,15 +7,22 @@ from src.helpers.common import get_new_uuid
 from .serializer import SignUpSchema
 
 
-class Collection(object):
+class Collection:
+    __slots__ = (
+        "_api",
+        "_credentials",
+        "_domain",
+        "_scope",
+    )
+
     def __init__(self, api, credentials_store, domain: str, scope: str):
         self._api = api
-        self._domain = domain
         self._credentials = credentials_store
+        self._domain = domain
         self._scope = scope
 
     def on_get(self, req, resp):
-        # TODO
+        # TODO - Return list of all the users
         resp.body = {}
         resp.status = falcon.HTTP_200
 
@@ -37,11 +44,18 @@ class Collection(object):
         resp.status = falcon.HTTP_201
 
 
-class Item(object):
+class Item:
+    __slots__ = (
+        "_api",
+        "_credentials",
+        "_domain",
+        "_scope",
+    )
+
     def __init__(self, api, credentials_store, domain: str, scope: str):
         self._api = api
-        self._domain = domain
         self._credentials = credentials_store
+        self._domain = domain
         self._scope = scope
 
     def on_get(self, req, resp, user_id: str):

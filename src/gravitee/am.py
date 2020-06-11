@@ -8,11 +8,17 @@ from requests.adapters import HTTPAdapter
 from src.api.auth import BearerAuth
 from src.api.client import Client
 
-from .constants import GRANT_TYPES, PATHS, GrantTypes, Services
+from .constants import GRANT_TYPES, PATHS, ContentTypes, GrantTypes, Services
+from .helpers import add_content_type_to_header
 from .serializer import TokenSchema, UserSchema
 
 
 class AM:
+    __slots__ = (
+        "_host",
+        "_http",
+    )
+
     def __init__(self, host: str, adapter: Optional[HTTPAdapter] = None):
         self._host = host
         self._http = Client()
@@ -33,9 +39,8 @@ class AM:
         if scope is not None:
             payload["scope"] = scope
 
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
-        }
+        headers: Dict[str, str] = {}
+        add_content_type_to_header(ContentTypes.Form_Urlencoded, headers)
         r = self._http.send(
             "post", url, data=payload, headers=headers, auth=auth
         )
@@ -74,9 +79,8 @@ class AM:
     ):
         url = self._create_url(domain, Services.Revoke)
         payload = {"token": token, "token_type_hint": token_type_hint}
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
-        }
+        headers: Dict[str, str] = {}
+        add_content_type_to_header(ContentTypes.Form_Urlencoded, headers)
         r = self._http.send(
             "post",
             url,
@@ -99,11 +103,13 @@ class AM:
         if errors:
             raise ValidationError(errors)
         url = self._create_url(domain, Services.Users)
+        headers: Dict[str, str] = {}
+        add_content_type_to_header(ContentTypes.Json, headers)
         r = self._http.send(
             "post",
             url,
             data=json.dumps(user),
-            headers={"Content-Type": "application/json"},
+            headers=headers,
             auth=BearerAuth(token),
         )
         r.raise_for_status()
