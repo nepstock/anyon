@@ -8,7 +8,15 @@ from .helpers import remove_token_type, transform_token_data
 from .serializer import SignInSchema
 
 
-class Collection(object):
+class Collection:
+    __slots__ = (
+        "_api",
+        "_client_id",
+        "_domain",
+        "_scope",
+        "_secrets_store",
+    )
+
     def __init__(
         self,
         api,
@@ -20,8 +28,8 @@ class Collection(object):
         self._api = api
         self._client_id = client_id
         self._domain = domain
-        self._secrets_store = secrets_store
         self._scope = scope
+        self._secrets_store = secrets_store
 
     def on_post(self, req, resp):
         data = SignInSchema().load(req.media)

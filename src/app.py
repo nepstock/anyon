@@ -1,47 +1,22 @@
 import falcon
 
-from src.errors.handler import (
-    HTTPError,
-    ValidationError,
-    handle_http,
-    handle_validations,
-)
-
-from .auth.views import Collection as AuthCollection
 from .gravitee.am import AM
+from .handlers import handlers
 from .helpers.adapter import get_adapter
 from .helpers.secrets import Secrets, check_secret
 from .helpers.token import Credentials, check_token
 from .helpers.variables import Store
-from .settings import (
-    AM_CLIENT_ID,
-    AM_CLIENT_SCOPE,
-    AM_CLIENT_SECRET,
-    AM_DOMAIN,
-    AM_URL,
-)
-from .users.views import Collection, Item
+from .routes import routes
+from .settings import AM_CLIENT_ID, AM_CLIENT_SECRET, AM_URL
 
 
 def create_app(am_api, credentials, secrets):
     api = falcon.API()
 
-    api.add_route(
-        "/oauth/token",
-        AuthCollection(
-            am_api, AM_CLIENT_ID, secrets, AM_DOMAIN, AM_CLIENT_SCOPE
-        ),
-    )
-    api.add_route(
-        "/users", Collection(am_api, credentials, AM_DOMAIN, AM_CLIENT_SCOPE)
-    )
-    api.add_route(
-        "/users/{user_id}",
-        Item(am_api, credentials, AM_DOMAIN, AM_CLIENT_SCOPE),
-    )
+    routes(api, am_api, credentials, secrets)
 
-    api.add_error_handler(HTTPError, handle_http)
-    api.add_error_handler(ValidationError, handle_validations)
+    handlers(api)
+
     return api
 
 

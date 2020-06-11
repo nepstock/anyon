@@ -5,7 +5,9 @@ from requests.adapters import HTTPAdapter
 from requests.auth import AuthBase
 
 
-class Client(object):
+class Client:
+    __slots__ = ("_http",)
+
     def __init__(self):
         self._http = Session()
 

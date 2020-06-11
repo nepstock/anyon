@@ -4,8 +4,10 @@ README.md
 .env*
 tests/
 deploy/
+**/__pycache__/
+.mypy_cache/
+.pytest_cache/
 .vscode/
-src/__pycache__/
 *.pyc
 *.pyo
 *.pyd
