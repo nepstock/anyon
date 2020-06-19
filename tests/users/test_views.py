@@ -5,7 +5,8 @@ from unittest.mock import patch
 import falcon
 import pytest
 
-from src.settings import AM_DOMAIN
+from src.settings import AM_DOMAIN, EMAIL_FROM
+from src.users.email import WELCOME_TEMAPLATE
 
 
 class TestItemSerializer:
@@ -14,7 +15,7 @@ class TestItemSerializer:
     ):
         url = f"/users/{output_am_get_user_response['id']}"
         response = client.simulate_get(url)
-        client.mock_am.get_user.assert_called_with(
+        client.mock_am.scim.get_user.assert_called_with(
             AM_DOMAIN,
             client.mock_credentials.get_token(),
             output_am_get_user_response["id"],
@@ -45,8 +46,14 @@ class TestCollectionSerializer:
             "active": True,
             "emails": [{"value": input_users_post["email"], "primary": True}],
         }
-        client.mock_am.create_user.assert_called_with(
+        client.mock_am.scim.create_user.assert_called_with(
             AM_DOMAIN, client.mock_credentials.get_token(), new_user,
+        )
+        client.mock_email.send.assert_called_with(
+            EMAIL_FROM,
+            input_users_post["email"],
+            WELCOME_TEMAPLATE["subject"],
+            WELCOME_TEMAPLATE["body"],
         )
         assert response.status == falcon.HTTP_201
         assert response.json == output_am_get_user_response

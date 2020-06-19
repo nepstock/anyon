@@ -10,6 +10,7 @@ from src.gravitee.constants import CLIENT_CREDENTIALS_SCOPES
 DOMAIN = "mock_domain"
 CLIENT_ID = "mock_client_id"
 CLIENT_SECRET = "mock_client_secret"
+EMAIL_FROM = "mock@example.com"
 SCOPE = next(iter(CLIENT_CREDENTIALS_SCOPES))
 
 
@@ -19,6 +20,7 @@ def mock_env(monkeypatch):
     monkeypatch.setenv("AM_CLIENT_ID", CLIENT_ID)
     monkeypatch.setenv("AM_CLIENT_SECRET", CLIENT_SECRET)
     monkeypatch.setenv("AM_CLIENT_SCOPE", SCOPE)
+    monkeypatch.setenv("EMAIL_FROM", EMAIL_FROM)
 
 
 @pytest.fixture
@@ -28,6 +30,11 @@ def mock_am():
 
 @pytest.fixture
 def mock_credentials():
+    return MagicMock()
+
+
+@pytest.fixture
+def mock_email():
     return MagicMock()
 
 
@@ -139,16 +146,19 @@ def output_view_am_client_credentials():
 def client(
     mock_am,
     mock_credentials,
+    mock_email,
     mock_secrets,
     output_view_am_client_credentials,
     output_am_get_user_response,
 ):
-    mock_am.token.return_value = output_view_am_client_credentials
-    mock_am.get_user.return_value = output_am_get_user_response
-    mock_am.create_user.return_value = output_am_get_user_response
-    api = create_app(mock_am, mock_credentials, mock_secrets)
+    mock_am.oauth.token.return_value = output_view_am_client_credentials
+    mock_am.scim.get_user.return_value = output_am_get_user_response
+    mock_am.scim.create_user.return_value = output_am_get_user_response
+    # mock_email.send.return_value =
+    api = create_app(mock_am, mock_credentials, mock_secrets, mock_email)
     t = testing.TestClient(api)
     t.mock_am = mock_am
     t.mock_credentials = mock_credentials
+    t.mock_email = mock_email
     t.mock_secrets = mock_secrets
     return t

@@ -12,7 +12,7 @@ class TestCollectionSerializer:
     ):
         url = "/oauth/token"
         response = client.simulate_post(url, json=input_auth_post)
-        client.mock_am.token.assert_called_with(
+        client.mock_am.oauth.token.assert_called_with(
             AM_DOMAIN,
             input_auth_post["client_id"],
             client.mock_secrets.get_secret(),
@@ -34,7 +34,7 @@ class TestCollectionSerializer:
         response = client.simulate_delete(
             url, headers={AUTHORIZATION: f"bearer {token}"}
         )
-        client.mock_am.revoke.assert_called_with(
+        client.mock_am.oauth.revoke.assert_called_with(
             AM_DOMAIN, AM_CLIENT_ID, client.mock_secrets.get_secret(), token,
         )
         assert response.status == falcon.HTTP_204
