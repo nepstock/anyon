@@ -6,7 +6,7 @@ from marshmallow.exceptions import ValidationError
 
 from src.gravitee.am import AM
 from src.gravitee.constants import GRANT_TYPES, PATHS, GrantTypes, Services
-from src.gravitee.serializer import TokenSchema, UserSchema
+from src.gravitee.serializer import SCIMUserSchema, TokenSchema
 
 
 class TestTokenSerializer:
@@ -31,7 +31,7 @@ class TestTokenSerializer:
             "post", url, requests_mock, output_am_client_credentials, 200
         )
         am = AM(input_am_client_credentials["host"])
-        r = am.token(
+        r = am.oauth.token(
             input_am_client_credentials["domain"],
             input_am_client_credentials["client_id"],
             input_am_client_credentials["client_secret"],
@@ -58,7 +58,7 @@ class TestTokenSerializer:
         self._register_uri("post", url, requests_mock, None, status_code=404)
         am = AM(input_am_client_credentials["host"])
         with pytest.raises(requests.exceptions.HTTPError):
-            r = am.token(
+            r = am.oauth.token(
                 input_am_client_credentials["domain"],
                 input_am_client_credentials["client_id"],
                 input_am_client_credentials["client_secret"],
@@ -76,7 +76,7 @@ class TestTokenSerializer:
             "post", url, requests_mock, output_am_client_credentials, 200
         )
         am = AM(input_am_password["host"])
-        r = am.token(
+        r = am.oauth.token(
             input_am_password["domain"],
             input_am_password["client_id"],
             input_am_password["client_secret"],
@@ -105,7 +105,7 @@ class TestTokenSerializer:
         self._register_uri("post", url, requests_mock, None, status_code=400)
         am = AM(input_am_password["host"])
         with pytest.raises(requests.exceptions.HTTPError):
-            r = am.token(
+            r = am.oauth.token(
                 input_am_password["domain"],
                 input_am_password["client_id"],
                 input_am_password["client_secret"],
@@ -130,12 +130,12 @@ class TestTokenSerializer:
             "get", url, requests_mock, output_am_get_user_response, 200
         )
         am = AM(input_am_client_credentials["host"])
-        r = am.get_user(
+        r = am.scim.get_user(
             input_am_client_credentials["domain"],
             output_am_client_credentials["access_token"],
             output_am_get_user_response["id"],
         )
-        output = UserSchema().dump(output_am_get_user_response)
+        output = SCIMUserSchema().dump(output_am_get_user_response)
         assert r == output
 
     def test_get_user_http_error(
@@ -153,7 +153,7 @@ class TestTokenSerializer:
         self._register_uri("get", url, requests_mock, None, 400)
         am = AM(input_am_client_credentials["host"])
         with pytest.raises(requests.exceptions.HTTPError):
-            r = am.get_user(
+            r = am.scim.get_user(
                 input_am_client_credentials["domain"],
                 output_am_client_credentials["access_token"],
                 output_am_get_user_response["id"],
@@ -175,12 +175,12 @@ class TestTokenSerializer:
             "post", url, requests_mock, output_am_get_user_response, 201
         )
         am = AM(input_am_client_credentials["host"])
-        r = am.create_user(
+        r = am.scim.create_user(
             input_am_client_credentials["domain"],
             output_am_client_credentials["access_token"],
             input_am_create_user,
         )
-        output = UserSchema().dump(output_am_get_user_response)
+        output = SCIMUserSchema().dump(output_am_get_user_response)
         assert r == output
 
     def test_create_user_http_error(
@@ -198,7 +198,7 @@ class TestTokenSerializer:
         self._register_uri("post", url, requests_mock, None, 400)
         am = AM(input_am_client_credentials["host"])
         with pytest.raises(requests.exceptions.HTTPError):
-            r = am.create_user(
+            r = am.scim.create_user(
                 input_am_client_credentials["domain"],
                 output_am_client_credentials["access_token"],
                 input_am_create_user,
@@ -213,7 +213,7 @@ class TestTokenSerializer:
     ):
         am = AM(input_am_client_credentials["host"])
         with pytest.raises(ValidationError):
-            r = am.create_user(
+            r = am.scim.create_user(
                 input_am_client_credentials["domain"],
                 output_am_client_credentials["access_token"],
                 {},

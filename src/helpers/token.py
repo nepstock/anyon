@@ -23,7 +23,7 @@ class Credentials:
     def get_token(self, domain: str, scope: Optional[str]):
         credentials = self._store.get()
         if credentials is None:
-            credentials = self._api.token(
+            credentials = self._api.oauth.token(
                 domain, self._client_id, self._client_secret, scope
             )
             self._store.put(credentials)

@@ -4,7 +4,7 @@ import pytest
 from marshmallow.exceptions import ValidationError
 
 from src.gravitee.constants import CLIENT_CREDENTIALS_SCOPES
-from src.gravitee.serializer import TokenSchema, UserSchema
+from src.gravitee.serializer import SCIMUserSchema, TokenSchema
 
 SCOPE = next(iter(CLIENT_CREDENTIALS_SCOPES))
 
@@ -21,9 +21,19 @@ class TestTokenSerializer:
         schema = TokenSchema()
         schema.load(token_data)
 
-    def test_load_scope_success(self):
+    def test_load_empty_scope_success(self):
         token_data = {
-            "scope": "scim",
+            "scope": "",
+            "expires_in": 7199,
+            "id_token": "aKAhpjUMn_dYbH5jiDdJn8s0EdbtbMNqOTPhcI89T2g",
+            "token_type": "bearer",
+            "access_token": "2glZ7GYZaY3lD5ivIsgfDbQEBLEKHZNJ4UZWZEEbhEY",
+        }
+        schema = TokenSchema()
+        schema.load(token_data)
+
+    def test_load_no_scope_success(self):
+        token_data = {
             "expires_in": 7199,
             "id_token": "aKAhpjUMn_dYbH5jiDdJn8s0EdbtbMNqOTPhcI89T2g",
             "token_type": "bearer",
@@ -47,7 +57,7 @@ class TestTokenSerializer:
 
     def test_load_invalid_scope(self):
         token_data = {
-            "scope": "scim blablabla",
+            "scope": "blablabla",
             "expires_in": 7199,
             "id_token": "aKAhpjUMn_dYbH5jiDdJn8s0EdbtbMNqOTPhcI89T2g",
             "token_type": "bearer",
@@ -79,7 +89,7 @@ class TestUserSerializer:
             "active": False,
             "emails": [{"value": "test@example.com", "primary": True}],
         }
-        schema = UserSchema()
+        schema = SCIMUserSchema()
         schema.dump(user_data)
 
     def test_dump_default_id_success(self):
@@ -100,7 +110,7 @@ class TestUserSerializer:
             "active": False,
             "emails": [{"value": "test@example.com", "primary": True}],
         }
-        schema = UserSchema()
+        schema = SCIMUserSchema()
         user = schema.dump(user_data)
         assert "id" in user and uuid.UUID(user["id"], version=4)
 
@@ -122,7 +132,7 @@ class TestUserSerializer:
             "active": False,
             "emails": [{"value": "test@example.com", "primary": True}],
         }
-        schema = UserSchema()
+        schema = SCIMUserSchema()
         with pytest.raises(ValidationError) as e:
             schema.dump(user_data)
         e.match(r"\{'schemas': \['Shorter than minimum length 1.'\]\}")
@@ -137,7 +147,7 @@ class TestUserSerializer:
             "active": True,
             "emails": [{"value": "test@example.com", "primary": True}],
         }
-        schema = UserSchema()
+        schema = SCIMUserSchema()
         user = schema.load(user_data)
 
     def test_load_unknown_fields(self):
@@ -160,7 +170,7 @@ class TestUserSerializer:
             "active": False,
             "emails": [{"value": "test@example.com", "primary": True}],
         }
-        schema = UserSchema()
+        schema = SCIMUserSchema()
         with pytest.raises(ValidationError) as e:
             schema.load(user_data)
         e.match(r"\{'meta': \['Unknown field.'\]\}")
@@ -175,7 +185,7 @@ class TestUserSerializer:
             "active": False,
             "emails": [],
         }
-        schema = UserSchema()
+        schema = SCIMUserSchema()
         with pytest.raises(ValidationError) as e:
             schema.load(user_data)
         e.match(r"\{'emails': \['Shorter than minimum length 1.'\]\}")
@@ -189,7 +199,7 @@ class TestUserSerializer:
             "active": False,
             "emails": [{"value": "test@example.com", "primary": True}],
         }
-        schema = UserSchema()
+        schema = SCIMUserSchema()
         with pytest.raises(ValidationError) as e:
             schema.load(user_data)
         e.match(r"\{'password': \['Missing data for required field.'\]\}")

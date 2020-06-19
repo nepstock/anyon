@@ -34,7 +34,7 @@ class Collection:
     def on_post(self, req, resp):
         data = SignInSchema().load(req.media)
         secret = self._secrets_store.get_secret(data["client_id"])
-        token_data = self._api.token(
+        token_data = self._api.oauth.token(
             self._domain,
             data["client_id"],
             secret,
@@ -52,5 +52,5 @@ class Collection:
             raise falcon.HTTPBadRequest()
         token = remove_token_type(req.headers[AUTHORIZATION])
         secret = self._secrets_store.get_secret(self._client_id)
-        self._api.revoke(self._domain, self._client_id, secret, token)
+        self._api.oauth.revoke(self._domain, self._client_id, secret, token)
         resp.status = falcon.HTTP_204

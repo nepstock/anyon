@@ -2,6 +2,7 @@ import datetime
 import uuid
 
 from marshmallow import (
+    INCLUDE,
     Schema,
     ValidationError,
     fields,
@@ -12,13 +13,14 @@ from marshmallow import (
 from marshmallow.decorators import pre_dump
 
 from .constants import CLIENT_CREDENTIALS_SCOPES
+from .helpers import change_dict_keys
 
 
 class TokenSchema(Schema):
     access_token = fields.Str(required=True, allow_none=False)
     token_type = fields.String(required=True, allow_none=False)
     expires_in = fields.Int(required=True, allow_none=False)
-    scope = fields.String(required=True, allow_none=False)
+    scope = fields.String(required=False, allow_none=False)
     id_token = fields.Str(allow_none=False)
     expires_date = fields.DateTime(
         required=False, missing=datetime.datetime.now()
@@ -41,8 +43,9 @@ class TokenSchema(Schema):
         values = set(value.split(" "))
         values_l = len(values)
         scopes_l = len(CLIENT_CREDENTIALS_SCOPES)
-        if values_l > scopes_l and not values.issubset(
-            CLIENT_CREDENTIALS_SCOPES
+        if value.strip() and (
+            values_l > scopes_l
+            or not values.issubset(CLIENT_CREDENTIALS_SCOPES)
         ):
             raise ValidationError("Invalid scope value.")
 
@@ -60,13 +63,10 @@ class MetaSchema(Schema):
                 data[x] = datetime.datetime.strptime(
                     data[x], "%Y-%m-%dT%H:%M:%S.%fZ"
                 )
-        for x in (
-            ("resourceType", "resource_type"),
-            ("lastModified", "modified"),
-        ):
-            if x[0] in data:
-                data[x[1]] = data[x[0]]
-                del data[x[0]]
+        change_dict_keys(
+            (("resourceType", "resource_type"), ("lastModified", "modified"),),
+            data,
+        )
         return data
 
 
@@ -81,17 +81,13 @@ class NameSchema(Schema):
 
     @pre_dump
     def preprocess(self, data, **kwargs):
-        for x in (
-            ("familyName", "family_name"),
-            ("givenName", "given_name"),
-        ):
-            if x[0] in data:
-                data[x[1]] = data[x[0]]
-                del data[x[0]]
+        change_dict_keys(
+            (("familyName", "family_name"), ("givenName", "given_name"),), data
+        )
         return data
 
 
-class UserSchema(Schema):
+class SCIMUserSchema(Schema):
     schemas = fields.List(fields.Str(required=True))
     id = fields.UUID(default=uuid.uuid4, required=True)
     external_id = fields.UUID(data_key="externalId", required=False)
@@ -114,13 +110,49 @@ class UserSchema(Schema):
             raise ValidationError(
                 {"schemas": ["Shorter than minimum length 1."]}
             )
-        for x in (
-            ("externalId", "external_id"),
-            ("userName", "user_name"),
-            ("displayName", "display_name"),
-        ):
-            if x[0] in data:
-                data[x[1]] = data[x[0]]
-                del data[x[0]]
-
+        change_dict_keys(
+            (
+                ("externalId", "external_id"),
+                ("userName", "user_name"),
+                ("displayName", "display_name"),
+            ),
+            data,
+        )
         return data
+
+
+class AdditionalInformationSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+
+class DomainUserSchema(Schema):
+    username = fields.Str(data_key="userName", required=True)
+    password = fields.Str(
+        validate=validate.Length(min=8, max=27), load_only=True
+    )
+    email = fields.Email(required=True)
+    first_name = fields.Str(data_key="firstName", required=True)
+    last_name = fields.Str(data_key="lastName", required=True)
+    external_id = fields.UUID(data_key="externalId", required=False)
+    accountNonExpired = fields.Boolean()
+    accountNonLocked = fields.Boolean()
+    credentialsNonExpired = fields.Boolean()
+    enabled = fields.Boolean()
+    internal = fields.Boolean(missing=False)
+    preRegistration = fields.Boolean(missing=True)
+    registrationCompleted = fields.Boolean()
+    domain = fields.Str()
+    source = fields.Str()
+    client = fields.Str()
+    loginsCount = fields.Int()
+    logged_at = fields.DateTime(
+        data_key="loggedAt", required=False, missing=datetime.datetime.now()
+    )
+    additionalInformation = fields.Nested(AdditionalInformationSchema)
+    created_at = fields.DateTime(
+        data_key="createdAt", required=False, missing=datetime.datetime.now()
+    )
+    updated_at = fields.DateTime(
+        data_key="updatedAt", required=False, missing=datetime.datetime.now()
+    )
