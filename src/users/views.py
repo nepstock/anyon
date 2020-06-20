@@ -3,7 +3,11 @@ import json
 import falcon
 
 from src.helpers.common import get_new_uuid
-from src.settings import EMAIL_FROM
+from src.settings import (
+    AM_CLIENT_CREDENTIALS_SCOPE,
+    AM_DOMAIN,
+    EMAIL_FROM,
+)
 
 from .email import WELCOME_TEMAPLATE
 from .serializer import SignUpSchema
@@ -18,12 +22,12 @@ class Collection:
         "_scope",
     )
 
-    def __init__(self, api, credentials_store, domain: str, scope: str, email):
+    def __init__(self, api, credentials_store, email):
         self._api = api
         self._credentials = credentials_store
-        self._domain = domain
+        self._domain = AM_DOMAIN
         self._email = email
-        self._scope = scope
+        self._scope = AM_CLIENT_CREDENTIALS_SCOPE
 
     def on_post(self, req, resp):
         data = SignUpSchema().load(req.media)
@@ -59,11 +63,11 @@ class Item:
         "_scope",
     )
 
-    def __init__(self, api, credentials_store, domain: str, scope: str):
+    def __init__(self, api, credentials_store):
         self._api = api
         self._credentials = credentials_store
-        self._domain = domain
-        self._scope = scope
+        self._domain = AM_DOMAIN
+        self._scope = AM_CLIENT_CREDENTIALS_SCOPE
 
     def on_get(self, req, resp, user_id: str):
         access_token = self._credentials.get_token(self._domain, self._scope)

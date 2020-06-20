@@ -5,7 +5,7 @@ from unittest.mock import patch
 import falcon
 import pytest
 
-from src.settings import AM_DOMAIN, EMAIL_FROM
+from src.settings import AM_CLIENT_CREDENTIALS_SCOPE, AM_DOMAIN, EMAIL_FROM
 from src.users.email import WELCOME_TEMAPLATE
 
 
@@ -15,6 +15,9 @@ class TestItemSerializer:
     ):
         url = f"/users/{output_am_get_user_response['id']}"
         response = client.simulate_get(url)
+        client.mock_credentials.get_token.assert_called_with(
+            AM_DOMAIN, AM_CLIENT_CREDENTIALS_SCOPE
+        )
         client.mock_am.scim.get_user.assert_called_with(
             AM_DOMAIN,
             client.mock_credentials.get_token(),
@@ -46,6 +49,9 @@ class TestCollectionSerializer:
             "active": True,
             "emails": [{"value": input_users_post["email"], "primary": True}],
         }
+        client.mock_credentials.get_token.assert_called_with(
+            AM_DOMAIN, AM_CLIENT_CREDENTIALS_SCOPE
+        )
         client.mock_am.scim.create_user.assert_called_with(
             AM_DOMAIN, client.mock_credentials.get_token(), new_user,
         )
