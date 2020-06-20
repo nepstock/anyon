@@ -3,6 +3,8 @@ from typing import Optional
 
 import falcon
 
+from src.settings import AM_CLIENT_ID, AM_CLIENT_SCOPE, AM_DOMAIN
+
 from .constants import AUTHORIZATION
 from .helpers import remove_token_type, transform_token_data
 from .serializer import SignInSchema
@@ -17,18 +19,11 @@ class Collection:
         "_secrets_store",
     )
 
-    def __init__(
-        self,
-        api,
-        client_id: str,
-        secrets_store,
-        domain: str,
-        scope: Optional[str],
-    ):
+    def __init__(self, api, secrets_store):
         self._api = api
-        self._client_id = client_id
-        self._domain = domain
-        self._scope = scope
+        self._client_id = AM_CLIENT_ID
+        self._domain = AM_DOMAIN
+        self._scope = AM_CLIENT_SCOPE
         self._secrets_store = secrets_store
 
     def on_post(self, req, resp):
