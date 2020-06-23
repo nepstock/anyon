@@ -5,6 +5,7 @@ import falcon
 from src.helpers.common import get_new_uuid
 from src.settings import (
     AM_CLIENT_CREDENTIALS_SCOPE,
+    AM_CLIENT_SCOPE,
     AM_DOMAIN,
     EMAIL_FROM,
 )
@@ -27,7 +28,7 @@ class Collection:
         self._credentials = credentials_store
         self._domain = AM_DOMAIN
         self._email = email
-        self._scope = AM_CLIENT_CREDENTIALS_SCOPE
+        self._scope = f"{AM_CLIENT_CREDENTIALS_SCOPE} {AM_CLIENT_SCOPE}"
 
     def on_post(self, req, resp):
         data = SignUpSchema().load(req.media)
@@ -67,7 +68,7 @@ class Item:
         self._api = api
         self._credentials = credentials_store
         self._domain = AM_DOMAIN
-        self._scope = AM_CLIENT_CREDENTIALS_SCOPE
+        self._scope = f"{AM_CLIENT_CREDENTIALS_SCOPE} {AM_CLIENT_SCOPE}"
 
     def on_get(self, req, resp, user_id: str):
         access_token = self._credentials.get_token(self._domain, self._scope)

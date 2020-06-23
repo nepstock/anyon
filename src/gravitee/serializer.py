@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from typing import Final
 
 from marshmallow import (
     INCLUDE,
@@ -12,8 +13,11 @@ from marshmallow import (
 )
 from marshmallow.decorators import pre_dump
 
-from .constants import CLIENT_CREDENTIALS_SCOPES
+from .constants import CLIENT_CREDENTIALS_SCOPES, CLIENT_SCOPE
 from .helpers import change_dict_keys
+
+CLIENT_SCOPE_SIZE: Final[int] = len(CLIENT_SCOPE)
+CLIENT_CREDENTIALS_SCOPE_SIZE: Final[int] = len(CLIENT_CREDENTIALS_SCOPES)
 
 
 class TokenSchema(Schema):
@@ -41,10 +45,21 @@ class TokenSchema(Schema):
     @validates("scope")
     def scope_validation(self, value):
         values = set(value.split(" "))
-        values_l = len(values)
-        scopes_l = len(CLIENT_CREDENTIALS_SCOPES)
+        values_size = len(values)
         if value.strip() and (
-            values_l > scopes_l
+            values_size > CLIENT_SCOPE_SIZE
+            or not values.issubset(CLIENT_SCOPE)
+        ):
+            raise ValidationError("Invalid scope value.")
+
+
+class ClientCredentialsTokenSchema(TokenSchema):
+    @validates("scope")
+    def scope_validation(self, value):
+        values = set(value.split(" "))
+        values_size = len(values)
+        if value.strip() and (
+            values_size > CLIENT_CREDENTIALS_SCOPE_SIZE
             or not values.issubset(CLIENT_CREDENTIALS_SCOPES)
         ):
             raise ValidationError("Invalid scope value.")

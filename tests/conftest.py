@@ -11,7 +11,7 @@ DOMAIN = "mock_domain"
 CLIENT_ID = "mock_client_id"
 CLIENT_SECRET = "mock_client_secret"
 EMAIL_FROM = "mock@example.com"
-SCOPE = next(iter(CLIENT_CREDENTIALS_SCOPES))
+SCOPE = "openid"
 
 
 @pytest.fixture

@@ -3,10 +3,10 @@ import uuid
 import pytest
 from marshmallow.exceptions import ValidationError
 
-from src.gravitee.constants import CLIENT_CREDENTIALS_SCOPES
+from src.gravitee.constants import CLIENT_SCOPE
 from src.gravitee.serializer import SCIMUserSchema, TokenSchema
 
-SCOPE = next(iter(CLIENT_CREDENTIALS_SCOPES))
+SCOPE = next(iter(CLIENT_SCOPE))
 
 
 class TestTokenSerializer:
