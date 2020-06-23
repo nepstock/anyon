@@ -6,7 +6,11 @@ from marshmallow.exceptions import ValidationError
 
 from src.gravitee.am import AM
 from src.gravitee.constants import GRANT_TYPES, PATHS, GrantTypes, Services
-from src.gravitee.serializer import SCIMUserSchema, TokenSchema
+from src.gravitee.serializer import (
+    ClientCredentialsTokenSchema,
+    SCIMUserSchema,
+    TokenSchema,
+)
 
 
 class TestTokenSerializer:
@@ -44,7 +48,9 @@ class TestTokenSerializer:
         assert requests_mock.request_history[0].text == urllib.parse.urlencode(
             payload, doseq=True
         )
-        reponse_schema = TokenSchema().load(output_am_client_credentials)
+        reponse_schema = ClientCredentialsTokenSchema().load(
+            output_am_client_credentials
+        )
         r["expires_date"] = reponse_schema["expires_date"]
         assert reponse_schema == r
 

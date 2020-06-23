@@ -1,9 +1,9 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
+from .base import Base
 from .constants import GRANT_TYPES, ContentTypes, GrantTypes, Services
 from .helpers import add_content_type_to_header
-from .serializer import TokenSchema
-from .base import Base
+from .serializer import ClientCredentialsTokenSchema, TokenSchema
 
 
 class Oauth(Base):
@@ -14,6 +14,7 @@ class Oauth(Base):
         url: str,
         payload: Dict,
         auth: Tuple[str, str],
+        schema: Union[TokenSchema, ClientCredentialsTokenSchema],
         scope: Optional[str] = None,
     ):
         if scope is not None:
@@ -26,7 +27,7 @@ class Oauth(Base):
         )
         r.raise_for_status()
         if r.status_code == 200:
-            return TokenSchema().load(r.json())
+            return schema.load(r.json())
         return None
 
     def token(
@@ -41,13 +42,19 @@ class Oauth(Base):
         payload = {
             "grant_type": GRANT_TYPES[GrantTypes.Credentials],
         }
+        schema: Union[
+            TokenSchema, ClientCredentialsTokenSchema
+        ] = ClientCredentialsTokenSchema()
         if "username" in kwargs and "password" in kwargs:
             payload = {
                 "grant_type": GRANT_TYPES[GrantTypes.Password],
                 "username": kwargs["username"],
                 "password": kwargs["password"],
             }
-        return self._token(url, payload, (client_id, client_secret), scope)
+            schema = TokenSchema()
+        return self._token(
+            url, payload, (client_id, client_secret), schema, scope
+        )
 
     def revoke(
         self,

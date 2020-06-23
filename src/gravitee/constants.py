@@ -29,6 +29,11 @@ class HeaderTypes(Enum):
 
 CLIENT_CREDENTIALS_SCOPES: Final[FrozenSet] = frozenset(
     os.getenv("AM_CLIENT_CREDENTIALS_SCOPE", "").split(" ")
+    + os.getenv("AM_CLIENT_SCOPE", "").split(" ")
+)
+
+CLIENT_SCOPE: Final[FrozenSet] = frozenset(
+    os.getenv("AM_CLIENT_SCOPE", "").split(" ")
 )
 
 CONTENT_TYPES: Final[Dict[ContentTypes, str]] = {
