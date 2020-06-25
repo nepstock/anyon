@@ -2,7 +2,7 @@ from typing import Dict
 
 import falcon
 from marshmallow.exceptions import ValidationError
-from requests.exceptions import HTTPError
+from requests.exceptions import ConnectionError, HTTPError
 
 
 def handle_validations(req, resp, error, params):
@@ -40,3 +40,7 @@ def handle_http(req, resp, error, params):
     elif status_code == 503:
         raise falcon.HTTPServiceUnavailable()
     raise falcon.HTTPInternalServerError()
+
+
+def handle_request_errors(req, resp, error, params):
+    raise falcon.HTTPBadGateway(description="")

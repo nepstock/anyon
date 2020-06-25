@@ -16,8 +16,7 @@ class Store:
 
     def get(self, **kwargs):
         if not self._shared_queue.empty():
-            item = self._shared_queue.get()
-            if self._check_fn and self._check_fn(item, **kwargs):
-                self.put(item)
-                return item
+            for item in list(self._shared_queue.queue):
+                if self._check_fn and self._check_fn(item, **kwargs):
+                    return item
         return None
