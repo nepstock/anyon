@@ -28,10 +28,12 @@ class TestItemSerializer:
 
 
 class TestCollectionSerializer:
+    @patch("src.users.views.validate")
     @patch("src.users.views.get_new_uuid")
     def test_post_success(
         self,
         get_new_uuid,
+        validate,
         mock_env,
         client,
         input_users_post,
@@ -39,6 +41,7 @@ class TestCollectionSerializer:
     ):
         url = "/users"
         get_new_uuid.return_value = output_am_get_user_response["id"]
+        validate.return_value = True
         response = client.simulate_post(url, json=input_users_post)
         new_user = {
             "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
@@ -63,3 +66,12 @@ class TestCollectionSerializer:
         )
         assert response.status == falcon.HTTP_201
         assert response.json == output_am_get_user_response
+
+    @patch("src.users.views.validate")
+    def test_post_error_422(
+        self, validate, mock_env, client, input_users_post,
+    ):
+        url = "/users"
+        validate.return_value = False
+        response = client.simulate_post(url, json=input_users_post)
+        assert response.status == falcon.HTTP_422
