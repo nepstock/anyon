@@ -12,6 +12,7 @@ pydocstyle = "*"
 pyflakes = "*"
 requests-mock = "*"
 vulture = "*"
+pytest-cov = "*"
 
 [packages]
 falcon = "*"

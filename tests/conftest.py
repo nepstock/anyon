@@ -154,7 +154,7 @@ def client(
     mock_am.oauth.token.return_value = output_view_am_client_credentials
     mock_am.scim.get_user.return_value = output_am_get_user_response
     mock_am.scim.create_user.return_value = output_am_get_user_response
-    # mock_email.send.return_value =
+    mock_email.send.side_effect = Exception("email")
     api = create_app(mock_am, mock_credentials, mock_secrets, mock_email)
     t = testing.TestClient(api)
     t.mock_am = mock_am

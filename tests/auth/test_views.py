@@ -42,3 +42,11 @@ class TestCollectionSerializer:
             AM_DOMAIN, AM_CLIENT_ID, client.mock_secrets.get_secret(), token,
         )
         assert response.status == falcon.HTTP_204
+
+    def test_delete_error_401(
+        self, mock_env, client,
+    ):
+        url = "/oauth/token"
+        token = "some_toke"
+        response = client.simulate_delete(url)
+        assert response.status == falcon.HTTP_401
