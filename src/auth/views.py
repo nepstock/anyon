@@ -44,7 +44,7 @@ class Collection:
 
     def on_delete(self, req, resp):
         if AUTHORIZATION not in req.headers:
-            raise falcon.HTTPBadRequest()
+            raise falcon.HTTPUnauthorized()
         token = remove_token_type(req.headers[AUTHORIZATION])
         secret = self._secrets_store.get_secret(self._client_id)
         self._api.oauth.revoke(self._domain, self._client_id, secret, token)
